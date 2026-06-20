@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCN AI Automation ROI Planner</title>
+  <meta name="description" content="A free ASCN AI automation ROI planner for estimating time saved by AI agents and workflows." />
+  <style>
+    :root{
+      --bg:#0f172a; --card:#1e293b; --line:#334155;
+      --text:#f1f5f9; --muted:#94a3b8; --accent:#38bdf8; --accent-2:#16a34a;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; min-height:100vh; font-family:Arial,Helvetica,sans-serif;
+      background:radial-gradient(1200px 600px at 50% -10%,#1b2740,transparent),var(--bg);
+      color:var(--text); display:flex; flex-direction:column; align-items:center; padding:24px;
+    }
+    h1{font-size:clamp(24px,5vw,38px); margin:32px 0 4px; text-align:center}
+    .sub{color:var(--muted); margin:0 0 28px; text-align:center; max-width:560px; line-height:1.5}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:16px;
+      padding:28px; width:100%; max-width:460px; text-align:left;
+      box-shadow:0 20px 40px rgba(0,0,0,.35);
+    }
+    label{display:block; color:var(--muted); font-size:13px; margin:14px 0 6px}
+    input{
+      width:100%; padding:12px 14px; border-radius:10px; border:1px solid var(--line);
+      background:#0f1a2e; color:var(--text); font-size:16px;
+    }
+    .stats{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:22px 0}
+    .stat{background:#0f1a2e; border:1px solid var(--line); border-radius:12px; padding:16px 10px; text-align:center}
+    .stat .label{font-size:13px; color:var(--muted); margin-bottom:6px}
+    .stat .value{font-size:28px; font-weight:700}
+    button{
+      width:100%; padding:14px 20px; border:none; border-radius:10px; cursor:pointer;
+      font-size:16px; font-weight:700; color:#04210f; background:var(--accent-2);
+      transition:transform .05s ease, background .2s ease;
+    }
+    button:hover{background:#15803d}
+    button:active{transform:translateY(1px)}
+    .reset{margin-top:10px; background:transparent; color:var(--muted); font-weight:500; font-size:13px}
+    .reset:hover{background:transparent; color:var(--text)}
+    .cta{
+      display:block; margin:18px auto 0; width:100%; max-width:460px; text-decoration:none;
+      background:var(--accent); color:#06111f; font-weight:700; text-align:center;
+      padding:14px 18px; border-radius:10px;
+    }
+    .cta:hover{filter:brightness(1.05)}
+    .hint{color:var(--muted); font-size:12px; line-height:1.5; margin-top:10px}
+    footer{color:var(--muted); font-size:12px; margin-top:28px; max-width:560px; text-align:center; line-height:1.5}
+  </style>
+</head>
+<body>
+  <h1>🤖 ASCN AI Automation ROI Planner</h1>
+  <p class="sub">Estimate how many hours your AI agents could save each month. Progress is saved in your browser, so you can refine your workflow plan anytime.</p>
+
+  <div class="card">
+    <label for="tasks">Repetitive tasks per week</label>
+    <input id="tasks" type="number" min="0" value="10" />
+
+    <label for="minutes">Average minutes per task</label>
+    <input id="minutes" type="number" min="0" value="20" />
+
+    <label for="automation">Estimated automation rate (%)</label>
+    <input id="automation" type="number" min="0" max="100" value="60" />
+
+    <div class="stats">
+      <div class="stat">
+        <div class="label">Hours saved/mo</div>
+        <div class="value" id="hours">0</div>
+      </div>
+      <div class="stat">
+        <div class="label">Tasks automated/mo</div>
+        <div class="value" id="automated">0</div>
+      </div>
+    </div>
+
+    <button id="saveBtn">Save automation plan</button>
+    <button class="reset" id="resetBtn">Reset planner</button>
+    <p class="hint">Tip: start with tasks that repeat weekly, follow clear rules, or move data between apps like Gmail, Sheets, Slack, Telegram, Notion, and GitHub.</p>
+  </div>
+
+  <a class="cta" href="https://tinyurl.com/5684x7ts" target="_blank" rel="noopener sponsored">
+    🎁 Get ASCN AI: 35% OFF Longer-Term Billing →
+  </a>
+
+  <footer>
+    Built for operators exploring ASCN AI. This page contains an affiliate link — we may earn a commission at no extra cost to you. Not affiliated with or endorsed by ASCN AI.
+  </footer>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const read = (key, fallback) => localStorage.getItem(key) || fallback;
+
+    const fields = {
+      tasks: $("tasks"),
+      minutes: $("minutes"),
+      automation: $("automation")
+    };
+
+    function load(){
+      fields.tasks.value = read("ascn_tasks", "10");
+      fields.minutes.value = read("ascn_minutes", "20");
+      fields.automation.value = read("ascn_automation", "60");
+      calculate();
+    }
+
+    function calculate(){
+      const weeklyTasks = Math.max(0, Number(fields.tasks.value) || 0);
+      const minutes = Math.max(0, Number(fields.minutes.value) || 0);
+      const rate = Math.min(100, Math.max(0, Number(fields.automation.value) || 0)) / 100;
+      const monthlyTasks = weeklyTasks * 4.33;
+      const automatedTasks = monthlyTasks * rate;
+      const savedHours = (automatedTasks * minutes) / 60;
+
+      $("hours").innerText = savedHours.toFixed(1);
+      $("automated").innerText = Math.round(automatedTasks);
+    }
+
+    function save(){
+      localStorage.setItem("ascn_tasks", fields.tasks.value);
+      localStorage.setItem("ascn_minutes", fields.minutes.value);
+      localStorage.setItem("ascn_automation", fields.automation.value);
+      calculate();
+    }
+
+    function reset(){
+      if (!confirm("Reset your ASCN AI planner?")) return;
+      localStorage.removeItem("ascn_tasks");
+      localStorage.removeItem("ascn_minutes");
+      localStorage.removeItem("ascn_automation");
+      fields.tasks.value = 10;
+      fields.minutes.value = 20;
+      fields.automation.value = 60;
+      calculate();
+    }
+
+    Object.values(fields).forEach((field) => field.addEventListener("input", calculate));
+    $("saveBtn").addEventListener("click", save);
+    $("resetBtn").addEventListener("click", reset);
+    load();
+  </script>
+</body>
+</html>
